@@ -72,7 +72,7 @@ class HTTP::Request
   end
 
   def body=(@body : Nil)
-    @headers["Content-Length"] = "0" if @method == "POST" || @method == "PUT"
+    @headers["Content-Length"] = "0" if @method == HTTP::Methods::POST || @method == HTTP::Methods::PUT
   end
 
   def to_io(io)

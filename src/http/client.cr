@@ -474,7 +474,7 @@ class HTTP::Client
   #
   # ```
   # client = HTTP::Client.new "www.example.com"
-  # response = client.exec HTTP::Request.new("GET", "/")
+  # response = client.exec HTTP::Request.new(HTTP::Methods::GET, "/")
   # response.body # => "..."
   # ```
   def exec(request : HTTP::Request) : HTTP::Client::Response
@@ -512,7 +512,7 @@ class HTTP::Client
   #
   # ```
   # client = HTTP::Client.new "www.example.com"
-  # client.exec(HTTP::Request.new("GET", "/")) do |response|
+  # client.exec(HTTP::Request.new(HTTP::Methods::GET, "/")) do |response|
   #   response.body_io.gets # => "..."
   # end
   # ```
@@ -578,7 +578,7 @@ class HTTP::Client
   #
   # ```
   # client = HTTP::Client.new "www.example.com"
-  # response = client.exec "GET", "/"
+  # response = client.exec HTTP::Methods::GET, "/"
   # response.body # => "..."
   # ```
   def exec(method : String, path, headers : HTTP::Headers? = nil, body : BodyType = nil) : HTTP::Client::Response
@@ -590,7 +590,7 @@ class HTTP::Client
   #
   # ```
   # client = HTTP::Client.new "www.example.com"
-  # client.exec("GET", "/") do |response|
+  # client.exec(HTTP::Methods::GET, "/") do |response|
   #   response.body_io.gets # => "..."
   # end
   # ```
@@ -604,7 +604,7 @@ class HTTP::Client
   # The response will have its body as an `IO` accessed via `HTTP::Client::Response#body_io`.
   #
   # ```
-  # response = HTTP::Client.exec "GET", "http://www.example.com"
+  # response = HTTP::Client.exec HTTP::Methods::GET, "http://www.example.com"
   # response.body # => "..."
   # ```
   def self.exec(method, url : String | URI, headers : HTTP::Headers? = nil, body : BodyType = nil, tls = nil) : HTTP::Client::Response
@@ -617,7 +617,7 @@ class HTTP::Client
   # The response will have its body as an `IO` accessed via `HTTP::Client::Response#body_io`.
   #
   # ```
-  # HTTP::Client.exec("GET", "http://www.example.com") do |response|
+  # HTTP::Client.exec(HTTP::Methods::GET, "http://www.example.com") do |response|
   #   response.body_io.gets # => "..."
   # end
   # ```

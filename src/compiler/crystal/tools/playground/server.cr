@@ -312,7 +312,7 @@ module Crystal::Playground
 
     def call(context)
       case {context.request.method, context.request.resource}
-      when {"GET", @path}
+      when {HTTP::Methods::GET, @path}
         context.response.headers["Content-Type"] = "text/html"
         context.response << @page.to_s
       else
@@ -326,7 +326,7 @@ module Crystal::Playground
 
     def call(context)
       case {context.request.method, context.request.path}
-      when {"GET", /\/workbook\/playground\/(.*)/}
+      when {HTTP::Methods::GET, /\/workbook\/playground\/(.*)/}
         files = Dir["playground/#{$1}.{md,html,cr}"]
         if files.size > 0
           context.response.headers["Content-Type"] = "text/html"
@@ -390,7 +390,7 @@ module Crystal::Playground
 
     def call(context)
       case {context.request.method, context.request.resource}
-      when {"GET", "/environment.js"}
+      when {HTTP::Methods::GET, "/environment.js"}
         context.response.headers["Content-Type"] = "application/javascript"
         context.response.puts %(Environment = {})
 

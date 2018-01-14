@@ -4,7 +4,7 @@ require "http/server"
 describe HTTP::WebSocketHandler do
   it "returns not found if the request is not an websocket upgrade" do
     io = IO::Memory.new
-    request = HTTP::Request.new("GET", "/")
+    request = HTTP::Request.new(HTTP::Methods::GET, "/")
     response = HTTP::Server::Response.new(io)
     context = HTTP::Server::Context.new(request, response)
 
@@ -26,7 +26,7 @@ describe HTTP::WebSocketHandler do
       "Connection"        => "Upgrade",
       "Sec-WebSocket-Key" => "dGhlIHNhbXBsZSBub25jZQ==",
     }
-    request = HTTP::Request.new("GET", "/", headers: headers)
+    request = HTTP::Request.new(HTTP::Methods::GET, "/", headers: headers)
     response = HTTP::Server::Response.new(io)
     context = HTTP::Server::Context.new(request, response)
 
@@ -48,7 +48,7 @@ describe HTTP::WebSocketHandler do
         "Connection" =>        {{connection}},
         "Sec-WebSocket-Key" => "dGhlIHNhbXBsZSBub25jZQ==",
       }
-      request = HTTP::Request.new("GET", "/", headers: headers)
+      request = HTTP::Request.new(HTTP::Methods::GET, "/", headers: headers)
       response = HTTP::Server::Response.new(io)
       context = HTTP::Server::Context.new(request, response)
 
@@ -74,7 +74,7 @@ describe HTTP::WebSocketHandler do
       "Connection"        => "Upgrade",
       "Sec-WebSocket-Key" => "dGhlIHNhbXBsZSBub25jZQ==",
     }
-    request = HTTP::Request.new("GET", "/", headers: headers)
+    request = HTTP::Request.new(HTTP::Methods::GET, "/", headers: headers)
     response = HTTP::Server::Response.new(io)
     context = HTTP::Server::Context.new(request, response)
 

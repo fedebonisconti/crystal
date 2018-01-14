@@ -165,7 +165,7 @@ module HTTP
     # no explicit domain restriction and the path `/`.
     #
     # ```
-    # request = HTTP::Request.new "GET", "/"
+    # request = HTTP::Request.new HTTP::Methods::GET, "/"
     # request.cookies["foo"] = "bar"
     # ```
     def []=(key, value : String)
@@ -200,7 +200,7 @@ module HTTP
     # Get the current `HTTP::Cookie` for the given *key* or `nil` if none is set.
     #
     # ```
-    # request = HTTP::Request.new "GET", "/"
+    # request = HTTP::Request.new HTTP::Methods::GET, "/"
     # request.cookies["foo"]? # => nil
     # request.cookies["foo"] = "bar"
     # request.cookies["foo"]?.try &.value # > "bar"

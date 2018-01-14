@@ -16,34 +16,34 @@ describe HTTP::StaticFileHandler do
   file_text = File.read "#{__DIR__}/static/test.txt"
 
   it "should serve a file" do
-    response = handle HTTP::Request.new("GET", "/test.txt")
+    response = handle HTTP::Request.new(HTTP::Methods::GET, "/test.txt")
     response.status_code.should eq(200)
     response.body.should eq(File.read("#{__DIR__}/static/test.txt"))
   end
 
   it "should list directory's entries" do
-    response = handle HTTP::Request.new("GET", "/")
+    response = handle HTTP::Request.new(HTTP::Methods::GET, "/")
     response.status_code.should eq(200)
     response.body.should match(/test.txt/)
   end
 
   it "should not list directory's entries when directory_listing is set to false" do
-    response = handle HTTP::Request.new("GET", "/"), directory_listing: false
+    response = handle HTTP::Request.new(HTTP::Methods::GET, "/"), directory_listing: false
     response.status_code.should eq(404)
   end
 
   it "should not serve a not found file" do
-    response = handle HTTP::Request.new("GET", "/not_found_file.txt")
+    response = handle HTTP::Request.new(HTTP::Methods::GET, "/not_found_file.txt")
     response.status_code.should eq(404)
   end
 
   it "should not serve a not found directory" do
-    response = handle HTTP::Request.new("GET", "/not_found_dir/")
+    response = handle HTTP::Request.new(HTTP::Methods::GET, "/not_found_dir/")
     response.status_code.should eq(404)
   end
 
   it "should not serve a file as directory" do
-    response = handle HTTP::Request.new("GET", "/test.txt/")
+    response = handle HTTP::Request.new(HTTP::Methods::GET, "/test.txt/")
     response.status_code.should eq(404)
   end
 
@@ -64,14 +64,14 @@ describe HTTP::StaticFileHandler do
 
   it "should expand a request path" do
     %w(../test.txt ../../test.txt test.txt/../test.txt a/./b/../c/../../test.txt).each do |path|
-      response = handle HTTP::Request.new("GET", "/#{path}")
+      response = handle HTTP::Request.new(HTTP::Methods::GET, "/#{path}")
       response.status_code.should eq(302)
       response.headers["Location"].should eq("/test.txt")
     end
 
     # directory
     %w(.. ../ ../.. a/.. a/.././b/../).each do |path|
-      response = handle HTTP::Request.new("GET", "/#{path}")
+      response = handle HTTP::Request.new(HTTP::Methods::GET, "/#{path}")
       response.status_code.should eq(302)
       response.headers["Location"].should eq("/")
     end
@@ -79,13 +79,13 @@ describe HTTP::StaticFileHandler do
 
   it "should unescape a request path" do
     %w(test%2Etxt %74%65%73%74%2E%74%78%74).each do |path|
-      response = handle HTTP::Request.new("GET", "/#{path}")
+      response = handle HTTP::Request.new(HTTP::Methods::GET, "/#{path}")
       response.status_code.should eq(200)
       response.body.should eq(file_text)
     end
 
     %w(%2E%2E/test.txt found%2F%2E%2E%2Ftest%2Etxt).each do |path|
-      response = handle HTTP::Request.new("GET", "/#{path}")
+      response = handle HTTP::Request.new(HTTP::Methods::GET, "/#{path}")
       response.status_code.should eq(302)
       response.headers["Location"].should eq("/test.txt")
     end
@@ -93,7 +93,7 @@ describe HTTP::StaticFileHandler do
 
   it "should return 400" do
     %w(%00 test.txt%00).each do |path|
-      response = handle HTTP::Request.new("GET", "/#{path}")
+      response = handle HTTP::Request.new(HTTP::Methods::GET, "/#{path}")
       response.status_code.should eq(400)
     end
   end

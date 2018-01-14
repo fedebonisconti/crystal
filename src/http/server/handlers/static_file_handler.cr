@@ -24,7 +24,7 @@ class HTTP::StaticFileHandler
   end
 
   def call(context)
-    unless context.request.method == "GET" || context.request.method == "HEAD"
+    unless context.request.method == HTTP::Methods::GET || context.request.method == "HEAD"
       if @fallthrough
         call_next(context)
       else

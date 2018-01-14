@@ -4,7 +4,7 @@ require "http/server"
 describe HTTP::LogHandler do
   it "logs" do
     io = IO::Memory.new
-    request = HTTP::Request.new("GET", "/")
+    request = HTTP::Request.new(HTTP::Methods::GET, "/")
     response = HTTP::Server::Response.new(io)
     context = HTTP::Server::Context.new(request, response)
 
@@ -19,7 +19,7 @@ describe HTTP::LogHandler do
 
   it "does log errors" do
     io = IO::Memory.new
-    request = HTTP::Request.new("GET", "/")
+    request = HTTP::Request.new(HTTP::Methods::GET, "/")
     response = HTTP::Server::Response.new(io)
     context = HTTP::Server::Context.new(request, response)
 

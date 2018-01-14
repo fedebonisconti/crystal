@@ -7,7 +7,7 @@ module HTTP
       headers = HTTP::Headers.new
       headers["Host"] = "host.example.org"
       orignal_headers = headers.dup
-      request = Request.new "GET", "/", headers
+      request = Request.new HTTP::Methods::GET, "/", headers
 
       io = IO::Memory.new
       request.to_io(io)
@@ -19,7 +19,7 @@ module HTTP
       headers = HTTP::Headers.new
       headers["Host"] = "host.example.org"
       orignal_headers = headers.dup
-      request = Request.new "GET", "/greet?q=hello&name=world", headers
+      request = Request.new HTTP::Methods::GET, "/greet?q=hello&name=world", headers
 
       io = IO::Memory.new
       request.to_io(io)
@@ -31,7 +31,7 @@ module HTTP
       headers = HTTP::Headers.new
       headers["Host"] = "host.example.org"
       orignal_headers = headers.dup
-      request = Request.new "GET", "/", headers
+      request = Request.new HTTP::Methods::GET, "/", headers
       request.cookies << Cookie.new("foo", "bar")
 
       io = IO::Memory.new
@@ -46,7 +46,7 @@ module HTTP
       headers["Cookie"] = "foo=bar"
       orignal_headers = headers.dup
 
-      request = Request.new "GET", "/", headers
+      request = Request.new HTTP::Methods::GET, "/", headers
 
       io = IO::Memory.new
       request.to_io(io)
@@ -68,21 +68,21 @@ module HTTP
     end
 
     it "serialize POST (with body)" do
-      request = Request.new "POST", "/", body: "thisisthebody"
+      request = Request.new HTTP::Methods::POST, "/", body: "thisisthebody"
       io = IO::Memory.new
       request.to_io(io)
       io.to_s.should eq("POST / HTTP/1.1\r\nContent-Length: 13\r\n\r\nthisisthebody")
     end
 
     it "serialize POST (with bytes body)" do
-      request = Request.new "POST", "/", body: Bytes['a'.ord, 'b'.ord]
+      request = Request.new HTTP::Methods::POST, "/", body: Bytes['a'.ord, 'b'.ord]
       io = IO::Memory.new
       request.to_io(io)
       io.to_s.should eq("POST / HTTP/1.1\r\nContent-Length: 2\r\n\r\nab")
     end
 
     it "serialize POST (with io body, without content-length header)" do
-      request = Request.new "POST", "/", body: IO::Memory.new("thisisthebody")
+      request = Request.new HTTP::Methods::POST, "/", body: IO::Memory.new("thisisthebody")
       io = IO::Memory.new
       request.to_io(io)
       io.to_s.should eq("POST / HTTP/1.1\r\nTransfer-Encoding: chunked\r\n\r\nd\r\nthisisthebody\r\n0\r\n\r\n")
@@ -90,7 +90,7 @@ module HTTP
 
     it "serialize POST (with io body, with content-length header)" do
       string = "thisisthebody"
-      request = Request.new "POST", "/", body: IO::Memory.new(string)
+      request = Request.new HTTP::Methods::POST, "/", body: IO::Memory.new(string)
       request.content_length = string.bytesize
       io = IO::Memory.new
       request.to_io(io)
@@ -99,7 +99,7 @@ module HTTP
 
     it "raises if serializing POST body with incorrect content-length (less then real)" do
       string = "thisisthebody"
-      request = Request.new "POST", "/", body: IO::Memory.new(string)
+      request = Request.new HTTP::Methods::POST, "/", body: IO::Memory.new(string)
       request.content_length = string.bytesize - 1
       io = IO::Memory.new
       expect_raises(ArgumentError) do
@@ -109,7 +109,7 @@ module HTTP
 
     it "raises if serializing POST body with incorrect content-length (more then real)" do
       string = "thisisthebody"
-      request = Request.new "POST", "/", body: IO::Memory.new(string)
+      request = Request.new HTTP::Methods::POST, "/", body: IO::Memory.new(string)
       request.content_length = string.bytesize + 1
       io = IO::Memory.new
       expect_raises(ArgumentError) do
@@ -119,35 +119,35 @@ module HTTP
 
     it "parses GET" do
       request = Request.from_io(IO::Memory.new("GET / HTTP/1.1\r\nHost: host.example.org\r\n\r\n")).as(Request)
-      request.method.should eq("GET")
+      request.method.should eq(HTTP::Methods::GET)
       request.path.should eq("/")
       request.headers.should eq({"Host" => "host.example.org"})
     end
 
     it "parses GET with query params" do
       request = Request.from_io(IO::Memory.new("GET /greet?q=hello&name=world HTTP/1.1\r\nHost: host.example.org\r\n\r\n")).as(Request)
-      request.method.should eq("GET")
+      request.method.should eq(HTTP::Methods::GET)
       request.path.should eq("/greet")
       request.headers.should eq({"Host" => "host.example.org"})
     end
 
     it "parses GET without \\r" do
       request = Request.from_io(IO::Memory.new("GET / HTTP/1.1\nHost: host.example.org\n\n")).as(Request)
-      request.method.should eq("GET")
+      request.method.should eq(HTTP::Methods::GET)
       request.path.should eq("/")
       request.headers.should eq({"Host" => "host.example.org"})
     end
 
     it "parses empty header" do
       request = Request.from_io(IO::Memory.new("GET / HTTP/1.1\r\nHost: host.example.org\r\nReferer:\r\n\r\n")).as(Request)
-      request.method.should eq("GET")
+      request.method.should eq(HTTP::Methods::GET)
       request.path.should eq("/")
       request.headers.should eq({"Host" => "host.example.org", "Referer" => ""})
     end
 
     it "parses GET with cookie" do
       request = Request.from_io(IO::Memory.new("GET / HTTP/1.1\r\nHost: host.example.org\r\nCookie: a=b\r\n\r\n")).as(Request)
-      request.method.should eq("GET")
+      request.method.should eq(HTTP::Methods::GET)
       request.path.should eq("/")
       request.cookies["a"].value.should eq("b")
 
@@ -165,7 +165,7 @@ module HTTP
 
     it "parses POST (with body)" do
       request = Request.from_io(IO::Memory.new("POST /foo HTTP/1.1\r\nContent-Length: 13\r\n\r\nthisisthebody")).as(Request)
-      request.method.should eq("POST")
+      request.method.should eq(HTTP::Methods::POST)
       request.path.should eq("/foo")
       request.headers.should eq({"Content-Length" => "13"})
       request.body.not_nil!.gets_to_end.should eq("thisisthebody")
@@ -190,7 +190,7 @@ module HTTP
 
     describe "keep-alive" do
       it "is false by default in HTTP/1.0" do
-        request = Request.new "GET", "/", version: "HTTP/1.0"
+        request = Request.new HTTP::Methods::GET, "/", version: "HTTP/1.0"
         request.keep_alive?.should be_false
       end
 
@@ -198,13 +198,13 @@ module HTTP
         headers = HTTP::Headers.new
         headers["Connection"] = "keep-alive"
         orignal_headers = headers.dup
-        request = Request.new "GET", "/", headers: headers, version: "HTTP/1.0"
+        request = Request.new HTTP::Methods::GET, "/", headers: headers, version: "HTTP/1.0"
         request.keep_alive?.should be_true
         headers.should eq(orignal_headers)
       end
 
       it "is true by default in HTTP/1.1" do
-        request = Request.new "GET", "/", version: "HTTP/1.1"
+        request = Request.new HTTP::Methods::GET, "/", version: "HTTP/1.1"
         request.keep_alive?.should be_true
       end
 
@@ -212,7 +212,7 @@ module HTTP
         headers = HTTP::Headers.new
         headers["Connection"] = "close"
         orignal_headers = headers.dup
-        request = Request.new "GET", "/", headers: headers, version: "HTTP/1.1"
+        request = Request.new HTTP::Methods::GET, "/", headers: headers, version: "HTTP/1.1"
         request.keep_alive?.should be_false
         headers.should eq(orignal_headers)
       end
@@ -225,7 +225,7 @@ module HTTP
       end
 
       it "falls back to /" do
-        request = Request.new("GET", "/foo")
+        request = Request.new(HTTP::Methods::GET, "/foo")
         request.path = nil
         request.path.should eq("/")
       end

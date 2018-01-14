@@ -30,7 +30,7 @@ describe HTTP::FormData do
         --foo--
         FORMDATA
       headers = HTTP::Headers{"Content-Type" => "multipart/form-data; boundary=foo"}
-      request = HTTP::Request.new("GET", "/", headers, formdata.gsub('\n', "\r\n"))
+      request = HTTP::Request.new(HTTP::Methods::GET, "/", headers, formdata.gsub('\n', "\r\n"))
 
       res = nil
       HTTP::FormData.parse(request) do |part|
@@ -41,14 +41,14 @@ describe HTTP::FormData do
 
     it "raises on empty body" do
       headers = HTTP::Headers{"Content-Type" => "multipart/form-data; boundary=foo"}
-      req = HTTP::Request.new("GET", "/", headers)
+      req = HTTP::Request.new(HTTP::Methods::GET, "/", headers)
       expect_raises(HTTP::FormData::Error, "body is empty") do
         HTTP::FormData.parse(req) { }
       end
     end
 
     it "raises on no Content-Type" do
-      req = HTTP::Request.new("GET", "/", body: "")
+      req = HTTP::Request.new(HTTP::Methods::GET, "/", body: "")
       expect_raises(HTTP::FormData::Error, "could not find boundary in Content-Type") do
         HTTP::FormData.parse(req) { }
       end
@@ -56,7 +56,7 @@ describe HTTP::FormData do
 
     it "raises on invalid Content-Type" do
       headers = HTTP::Headers{"Content-Type" => "multipart/form-data; boundary="}
-      req = HTTP::Request.new("GET", "/", headers, body: "")
+      req = HTTP::Request.new(HTTP::Methods::GET, "/", headers, body: "")
       expect_raises(HTTP::FormData::Error, "could not find boundary in Content-Type") do
         HTTP::FormData.parse(req) { }
       end

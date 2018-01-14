@@ -50,7 +50,7 @@ module HTTP::Multipart
   # ```
   # headers = HTTP::Headers{"Content-Type" => "multipart/mixed; boundary=aA40"}
   # body = "--aA40\r\nContent-Type: text/plain\r\n\r\nbody\r\n--aA40--"
-  # request = HTTP::Request.new("POST", "/", headers, body)
+  # request = HTTP::Request.new(HTTP::Methods::POST, "/", headers, body)
   #
   # HTTP::Multipart.parse(request) do |headers, io|
   #   headers["Content-Type"] # => "text/plain"
