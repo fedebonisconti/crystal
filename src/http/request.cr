@@ -96,7 +96,7 @@ class HTTP::Request
 
     method, resource, http_version = parts
     HTTP.parse_headers_and_body(io) do |headers, body|
-      return new method, resource, headers, body, http_version
+      return new method.upcase, resource, headers, body, http_version
     end
 
     # Malformed or unexpectedly ended http request
