@@ -225,7 +225,7 @@ module HTTP
   def self.parse_time(time_str : String) : Time?
     DATE_PATTERNS.each do |pattern|
       begin
-        return Time.parse(time_str, pattern, kind: Time::Kind::Utc)
+        return Time.parse(time_str, pattern, location: Time::Location::UTC)
       rescue Time::Format::Error
       end
     end
@@ -275,6 +275,7 @@ module HTTP
   # string = %q("foo\ bar")
   # io = IO::Memory.new
   # HTTP.quote_string(string, io)
+  # io.rewind
   # io.gets_to_end # => %q(\"foo\\\ bar\")
   # ```
   def self.quote_string(string, io)

@@ -290,6 +290,12 @@ describe "File" do
     File.extname("/foo/bar/.profile").should eq("")
     File.extname("/foo/bar/.profile.sh").should eq(".sh")
     File.extname("/foo/bar/foo.").should eq("")
+    File.extname("/foo.bar/baz").should eq("")
+    File.extname("test.cr").should eq(".cr")
+    File.extname("test.cr.cz").should eq(".cz")
+    File.extname(".test").should eq("")
+    File.extname(".test.cr").should eq(".cr")
+    File.extname(".test.cr.cz").should eq(".cz")
     File.extname("test").should eq("")
   end
 
@@ -300,6 +306,11 @@ describe "File" do
     File.join(["foo", "bar", "baz"]).should eq("foo/bar/baz")
     File.join(["foo", "//bar//", "baz///"]).should eq("foo//bar//baz///")
     File.join(["/foo/", "/bar/", "/baz/"]).should eq("/foo/bar/baz/")
+    File.join(["", "foo"]).should eq("foo")
+    File.join(["foo", ""]).should eq("foo/")
+    File.join(["", "", "foo"]).should eq("foo")
+    File.join(["foo", "", "bar"]).should eq("foo/bar")
+    File.join(["foo", "", "", "bar"]).should eq("foo/bar")
   end
 
   it "chown" do
@@ -645,6 +656,28 @@ describe "File" do
         File.open(filename) { |file| file << "hello" }
       end
       File.delete(filename)
+    end
+
+    it "can create a new file in append mode" do
+      filename = Tempfile.tempname
+      begin
+        File.write(filename, "hello", mode: "a")
+        File.read(filename).should eq("hello")
+      ensure
+        File.delete(filename)
+      end
+    end
+
+    it "can append to an existing file" do
+      filename = Tempfile.tempname
+      begin
+        File.write(filename, "hello")
+        File.read(filename).should eq("hello")
+        File.write(filename, " world", mode: "a")
+        File.read(filename).should eq("hello world")
+      ensure
+        File.delete(filename)
+      end
     end
   end
 
@@ -1033,8 +1066,8 @@ describe "File" do
       filename = "#{__DIR__}/data/temp_write.txt"
       File.write(filename, "")
 
-      atime = Time.new(2000, 1, 2)
-      mtime = Time.new(2000, 3, 4)
+      atime = Time.utc(2000, 1, 2)
+      mtime = Time.utc(2000, 3, 4)
 
       File.utime(atime, mtime, filename)
 
@@ -1046,8 +1079,8 @@ describe "File" do
     end
 
     it "raises if file not found" do
-      atime = Time.new(2000, 1, 2)
-      mtime = Time.new(2000, 3, 4)
+      atime = Time.utc(2000, 1, 2)
+      mtime = Time.utc(2000, 3, 4)
 
       expect_raises Errno, "Error setting time to file" do
         File.utime(atime, mtime, "#{__DIR__}/nonexistent_file")
@@ -1069,7 +1102,7 @@ describe "File" do
 
     it "sets file times to given time" do
       filename = "#{__DIR__}/data/temp_touch.txt"
-      time = Time.new(2000, 3, 4)
+      time = Time.utc(2000, 3, 4)
       begin
         File.touch(filename, time)
 
